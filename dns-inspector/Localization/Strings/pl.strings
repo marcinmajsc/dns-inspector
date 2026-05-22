@@ -10,13 +10,13 @@ Altitude	Wysokość
 Answers	Odpowiedzi
 App Icon	Ikona aplikacji
 App language	Język aplikacji
-AppIconFooter	Flaga dumy „Progress” została stworzona przez Daniela Quasara i jest licencjonowana na warunkach Creative Commons BY-NC-SA. Flaga trans została stworzona przez Monicę Helms i udostępniona do domeny publicznej.
+AppIconFooter	Flaga Pride została stworzona przez Daniela Quasara i jest licencjonowana na warunkach Creative Commons BY-NC-SA. Flaga Trans została stworzona przez Monicę Helms i udostępniona do domeny publicznej.
 Appearance & Behaviour	Wygląd i zachowanie
 Area	Obszar
-Authority	Autorytet
+Authority	Autorytatywny
 Bad signing key: {details}	Nieprawidłowy klucz podpisujący: {0}
 Chain	Łańcuch
-Connection Timeout	Przekroczono limit czasu połączenia
+Connection Timeout	Limit czasu połączenia
 Connection error: {details}	Błąd połączenia: {0}
 Contribute to DNS Inspector	Współtwórz DNS Inspector
 Coordinates	Współrzędne
@@ -68,7 +68,7 @@ More from the developer	Więcej od dewelopera
 My Server	Mój serwer
 Name	Nazwa
 Network	Sieć
-New Saved Server	Nowy zapisany serwer
+New Saved Server	Zapisz nowy serwer
 New query	Nowe zapytanie
 Next Name	Następna nazwa
 No default ALPN	Brak domyślnego ALPN
@@ -90,13 +90,13 @@ Relative	Względne
 Remember last server	Zapamiętaj ostatni serwer
 Remember recent queries	Zapamiętaj ostatnie zapytania
 Response	Odpowiedź
-Response contained no answers	Odpowiedź nie zawierała odpowiedzi
+Response contained no answers	Nie zwrócono odpowiedzi
 Results	Wyniki
 Retry	Ponów
 Save	Zapisz
 Saved Server	Zapisany serwer
 Saved Servers	Zapisane serwery
-Seconds	Sekundy
+Seconds	Sekund
 Send traditional DNS requests using TCP	Wysyłaj tradycyjne zapytania DNS przez TCP
 Serial	Numer seryjny
 Server	Serwer
@@ -120,7 +120,7 @@ Target	Cel
 Timed out	Przekroczono limit czasu
 Too many redirects	Zbyt wiele przekierowań
 Traditional DNS	Tradycyjny DNS
-Trust Establishment Failed	Nie udało się ustanowić zaufania
+Trust Establishment Failed	Nie udało się ustanowić relacji zaufania
 Trusted	Zaufany
 Unable to save your changes	Nie można zapisać zmian
 Unexpected response: {details}	Nieoczekiwana odpowiedź: {0}

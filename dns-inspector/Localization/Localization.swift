@@ -163,7 +163,7 @@ public final class Localize {
         case .German:
             return "The \"Progress\" pride flag was created by Daniel Quasar and is licensed under Create Commons BY-NC-SA. The trans flag was created by Monica Helms and was released to the public domain."
         case .Polish:
-            return "Flaga dumy „Progress” została stworzona przez Daniela Quasara i jest licencjonowana na warunkach Creative Commons BY-NC-SA. Flaga trans została stworzona przez Monicę Helms i udostępniona do domeny publicznej."
+            return "Flaga Pride została stworzona przez Daniela Quasara i jest licencjonowana na warunkach Creative Commons BY-NC-SA. Flaga Trans została stworzona przez Monicę Helms i udostępniona do domeny publicznej."
         }
     }
     // key: Appearance & Behaviour
@@ -202,7 +202,7 @@ public final class Localize {
         case .German:
             return "Authority"
         case .Polish:
-            return "Autorytet"
+            return "Autorytatywny"
         }
     }
     // key: Bad signing key: {details}
@@ -241,7 +241,7 @@ public final class Localize {
         case .German:
             return "Verbindung ausgelaufen"
         case .Polish:
-            return "Przekroczono limit czasu połączenia"
+            return "Limit czasu połączenia"
         }
     }
     // key: Connection error: {details}
@@ -917,7 +917,7 @@ public final class Localize {
         case .German:
             return "New Saved Server"
         case .Polish:
-            return "Nowy zapisany serwer"
+            return "Zapisz nowy serwer"
         }
     }
     // key: New query
@@ -1203,7 +1203,7 @@ public final class Localize {
         case .German:
             return "Response contained no answers"
         case .Polish:
-            return "Odpowiedź nie zawierała odpowiedzi"
+            return "Nie zwrócono odpowiedzi"
         }
     }
     // key: Results
@@ -1281,7 +1281,7 @@ public final class Localize {
         case .German:
             return "Sekunden"
         case .Polish:
-            return "Sekundy"
+            return "Sekund"
         }
     }
     // key: Send traditional DNS requests using TCP
@@ -1593,7 +1593,7 @@ public final class Localize {
         case .German:
             return "Vertrauensetablierung fehlgeschlagen"
         case .Polish:
-            return "Nie udało się ustanowić zaufania"
+            return "Nie udało się ustanowić relacji zaufania"
         }
     }
     // key: Trusted

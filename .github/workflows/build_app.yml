@@ -1,78 +1,33 @@
-name: "Build App"
+name: Build DNS-Inspector Release IPA
 
 on:
-  push:
-    paths:
-      - '.github/workflows/build_app.yml'
-      - 'dns-inspector/**'
-      - 'dns-inspector.xcodeproj/**'
-      - '.swiftlint.yml'
-  pull_request:
-    paths:
-      - 'dns-inspector/**'
-      - 'dns-inspector.xcodeproj/**'
-      - '.swiftlint.yml'
-  schedule:
-    - cron: "16 16 */2 * *"
-
-permissions:
-  packages: read
-
-env:
-  TEST_DEVICE: "iPhone 16 Pro"
-  XCODE_VERSION: "Xcode_16.4" # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release"
+        required: true
 
 jobs:
-  build:
-    name: "Build App"
-    runs-on: macos-15
-    steps:
-      - name: Checkout Source
-        id: checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #pin v5.0.0
-        with:
-          persist-credentials: false
+  build-release-ipa:
+    runs-on: macos-26
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
 
-      - name: Install Profile and Certificates
-        id: install_credentials
-        run: |
-          echo '${{ secrets.DNS_INSPECTOR_DEVELOPMENT_PROVISIONING_PROFILE }}' > DNS_Inspector.mobileprovision.base64
-          base64 -i DNS_Inspector.mobileprovision.base64 -o DNS_Inspector.mobileprovision --decode && rm DNS_Inspector.mobileprovision.base64
-          mkdir -p "~/Library/MobileDevice/Provisioning Profiles/"
-          mv -v DNS_Inspector.mobileprovision   "~/Library/MobileDevice/Provisioning Profiles/39db396c-128b-4a79-8c9c-8dc36f721c92.mobileprovision"
-          echo '-----BEGIN CERTIFICATE-----' > dev.crt
-          echo '${{ secrets.APPLE_DEVELOPMENT_CERTIFICATE }}' >> dev.crt
-          echo '-----END CERTIFICATE-----' >> dev.crt
-          echo '${{ secrets.APPLE_DEVELOPMENT_PRIVATE_KEY }}' > dev.key.base64
-          base64 -i dev.key.base64 -o dev.key --decode && rm dev.key.base64
-          security import dev.crt -t cert -k ~/Library/Keychains/login.keychain-db -f pemseq -A
-          security import dev.key -t priv -k ~/Library/Keychains/login.keychain-db -f openssl -A
-          rm dev.key dev.crt
-      
-      - name: "Prepare Build Environment"
-        id: prepare
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Xcode 26.4
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Switching to ${{ env.XCODE_VERSION }}"
-          sudo xcode-select -s /Applications/${{ env.XCODE_VERSION }}.app/Contents/Developer
-          xcode-select -p
-          echo "DERIVEDDATA_PATH=$(xcodebuild -project dns-inspector.xcodeproj -showBuildSettings -configuration Debug 2>/dev/null | grep " BUILD_DIR = " | cut -d '=' -f2 | awk '{$1=$1};1' | sed 's%/Build/Products%%g')" >> "$GITHUB_OUTPUT"
+          sudo xcode-select -s /Applications/Xcode_26.4.app/Contents/Developer
           echo "SWIFTLINT_CACHE_KEY=swiftlint_$(gh api repos/realm/swiftlint/releases/latest --jq '.assets[] | select(.name == "portable_swiftlint.zip") | .id')" >> "$GITHUB_OUTPUT"
-          defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
-          defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+          cat $GITHUB_OUTPUT
 
-      - name: Restore Cached SwiftLint
-        id: restore_swiftlint
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 #pin v4.2.4
-        with:
-          key: ${{ steps.prepare.outputs.SWIFTLINT_CACHE_KEY }}
-          path: |
-            /Users/runner/bin/swiftlint
-      
-      - name: Install SwiftLint
+      - name: "Install SwiftLint"
         id: install_swiftlint
-        if: ${{ steps.restore_swiftlint.outputs.cache-hit != 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -84,14 +39,45 @@ jobs:
           rm swiftlint.zip LICENSE
           chmod a+x swiftlint
 
-      - name: Generate Strings
-        id: generate_strings
+      - name: "Resolve Package Dependencies"
+        id: dependencies
         run: |
-          cd "dns-inspector/Localization"
-          python3 lang.py
-
-      - name: Build
-        id: build
-        run: |
+          echo "resolvePackageDependencies"
           xcodebuild -resolvePackageDependencies -project "dns-inspector.xcodeproj"
-          xcodebuild -scheme "DNS Inspector" -project "dns-inspector.xcodeproj" -derivedDataPath ~/derived_data -sdk iphonesimulator -destination 'platform=iOS Simulator,name=${{ env.TEST_DEVICE }}' build
+
+
+      - name: Archive DNS Inspector (Release, unsigned)
+        run: |
+          set -euo pipefail
+
+          sed -i '' -E "s/(\t*MARKETING_VERSION *= *)[^ ;]+(;)/\1${{ github.event.inputs.version }}\2/" ./dns-inspector.xcodeproj/project.pbxproj
+
+          xcodebuild \
+            -project "dns-inspector.xcodeproj" \
+            -scheme "DNS Inspector" \
+            -configuration "Release" \
+            -destination "generic/platform=iOS" \
+            -archivePath "$GITHUB_WORKSPACE/build/DNS-Inspector.xcarchive" \
+            clean archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Create unsigned IPA from archive
+        run: |
+          set -euo pipefail
+          APP_PATH="$(find "$GITHUB_WORKSPACE/build/DNS-Inspector.xcarchive/Products/Applications" -maxdepth 1 -type d -name "*.app" | head -n 1)"
+          test -d "$APP_PATH"
+          rm -rf "$GITHUB_WORKSPACE/build/Payload"
+          mkdir -p "$GITHUB_WORKSPACE/build/Payload"
+          cp -R "$APP_PATH" "$GITHUB_WORKSPACE/build/Payload/"
+          cd "$GITHUB_WORKSPACE/build"
+          zip -qry "DNS-Inspector-unsigned.ipa" "Payload"
+
+      - name: Upload unsigned IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DNS-Inspector-unsigned-ipa
+          path: |
+            build/DNS-Inspector-unsigned.ipa
+          if-no-files-found: error
